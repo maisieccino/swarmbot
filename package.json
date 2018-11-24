@@ -1,0 +1,18 @@
+{
+  "name": "swarmbot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:mbellgb/swarmbot.git",
+  "author": "Matthew Bell <matt@mbell.me>",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^5.9.0"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "koa": "^2.6.2",
+    "node-fetch": "^2.3.0"
+  }
+}
