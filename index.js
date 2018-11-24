@@ -1,22 +1,47 @@
 const Koa = require("koa");
 const fetch = require("node-fetch");
+const qs = require("querystring");
+const { searchForImage } = require("./cse");
+const { sendPhoto } = require("./telegram");
 const fsqClientId = process.env.FOURSQUARE_CLIENT_ID;
 const fsqClientSecret = process.env.FOURSQUARE_CLIENT_SECRET;
 const fsqAuthToken = process.env.FOURSQUARE_AUTH_CODE || "";
 const tgBotToken = process.env.TG_BOT_TOKEN;
 const tgChatId = process.env.TG_CHAT_ID;
 
+let searchSince = `${Date.now()}`.substr(0, 10);
+
 const searchForCheckin = async () => {
-  const searchSince = Date();
   console.log(`Checking for new checkins since ${searchSince}...`);
 
   if (fsqAuthToken !== "") {
+    const query = qs.stringify({
+      oauth_token: fsqAuthToken,
+      v: 20181124,
+      afterTimestamp: searchSince,
+    });
+    searchSince = `${Date.now()}`.substr(0, 10);
     const res = await fetch(
-      `https://api.foursquare.com/v2/users/self/checkins?oauth_token=${fsqAuthToken}&v=20181124`,
+      `https://api.foursquare.com/v2/users/self/checkins?${query}`,
     );
-    console.log(res.status);
     if (res.ok) {
-      console.log(await res.json());
+      const fsqRes = await res.json();
+      console.log(Object.keys(fsqRes));
+      const checkins = fsqRes.response.checkins.items;
+      await Promise.all(
+        checkins.map(async checkin => {
+          const res = await searchForImage(
+            `${checkin.venue.name} ${checkin.venue.location.address}`,
+          );
+          if (!res.ok) {
+            throw new Error(await res.text());
+          }
+          const obj = await res.json();
+          console.log(obj);
+          const imageUrl = obj.items[0].link;
+          await sendPhoto(imageUrl, "test");
+        }),
+      );
     } else {
       console.log(JSON.stringify(await res.json(), "\n", 2));
     }
