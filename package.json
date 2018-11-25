@@ -13,7 +13,10 @@
   },
   "dependencies": {
     "form-data": "^2.3.3",
+    "gm": "^1.23.1",
     "koa": "^2.6.2",
-    "node-fetch": "^2.3.0"
+    "node-fetch": "^2.3.0",
+    "node-telegram-bot-api": "^0.30.0",
+    "request": "^2.88.0"
   }
 }

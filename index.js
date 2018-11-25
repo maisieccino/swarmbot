@@ -1,8 +1,10 @@
 const Koa = require("koa");
 const fetch = require("node-fetch");
 const qs = require("querystring");
+const fs = require("fs");
 const { searchForImage } = require("./cse");
 const { sendPhoto } = require("./telegram");
+const { addOverlay } = require("./image");
 const fsqClientId = process.env.FOURSQUARE_CLIENT_ID;
 const fsqClientSecret = process.env.FOURSQUARE_CLIENT_SECRET;
 const fsqAuthToken = process.env.FOURSQUARE_AUTH_CODE || "";
@@ -26,20 +28,20 @@ const searchForCheckin = async () => {
     );
     if (res.ok) {
       const fsqRes = await res.json();
-      console.log(Object.keys(fsqRes));
       const checkins = fsqRes.response.checkins.items;
       await Promise.all(
         checkins.map(async checkin => {
-          const res = await searchForImage(
-            `${checkin.venue.name} ${checkin.venue.location.address}`,
-          );
+          const res = await searchForImage(`"${checkin.venue.name}"`);
           if (!res.ok) {
             throw new Error(await res.text());
           }
           const obj = await res.json();
-          console.log(obj);
           const imageUrl = obj.items[0].link;
-          await sendPhoto(imageUrl, "test");
+          const imgBuf = await addOverlay(imageUrl);
+          await sendPhoto(
+            imgBuf,
+            `Matt just checked in at ${checkin.venue.name}`,
+          );
         }),
       );
     } else {
