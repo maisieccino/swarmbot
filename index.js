@@ -2,9 +2,13 @@ const Koa = require("koa");
 const fetch = require("node-fetch");
 const qs = require("querystring");
 const fs = require("fs");
+const dotenv = require("dotenv");
 const { searchForImage } = require("./cse");
 const { sendPhoto } = require("./telegram");
 const { addOverlay } = require("./image");
+
+dotenv.config({});
+
 const fsqClientId = process.env.FOURSQUARE_CLIENT_ID;
 const fsqClientSecret = process.env.FOURSQUARE_CLIENT_SECRET;
 const fsqAuthToken = process.env.FOURSQUARE_AUTH_CODE || "";
